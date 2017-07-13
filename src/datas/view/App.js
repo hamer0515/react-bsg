@@ -6,8 +6,7 @@ import {connect} from 'react-redux';
 import * as Status from '../status.js';
 import PropTypes from 'prop-types';
 import {actions as draftActions} from '../';
-import {getDateObjectFromFormat} from '../../utils/DateUtil';
-import {DATE_FMT} from '../../constants';
+import {filterHandlers, fields} from '../../constants';
 
 class DraftTable extends Component {
 
@@ -218,11 +217,11 @@ class DraftTable extends Component {
 }
 
 const doFilter = function (filter, activity) {
-  let fields = fieldMap[filter.field];
+  let realField = fields[filter.field].fields;
   let fieldHanler = filterHandlers[filter.type];
-  if (Array.isArray(fields)) {
-    for (let k in fields) {
-      let f = fields[k];
+  if (Array.isArray(realField)) {
+    for (let k in realField) {
+      let f = realField[k];
       let textNode = activity[f];
       if (doFieldHandler(filter.value, fieldHanler, textNode)) {
         return true;
@@ -230,64 +229,13 @@ const doFilter = function (filter, activity) {
     }
     return false;
   } else {
-    return doFieldHandler(filter.value, fieldHanler, activity[fields]);
+    return doFieldHandler(filter.value, fieldHanler, activity[realField]);
   }
 }
 
 const doFieldHandler = (value, handler, textNode) => {
   textNode = Array.isArray(textNode) ? textNode.join(' ') : textNode;
   return handler((value + '').trim(), (textNode + '').trim())
-}
-
-const fieldMap = {
-  activityTags: 'allTags',
-  author: 'author',
-  dateAdded: 'createdDate',
-  effectiveDate: 'eventDate',
-  titleAndDescription: [
-    'title', 'description'
-  ],
-  type: 'type',
-  inherited: 'flowThrough'
-};
-
-const filterHandlers = {
-  contains: (value, textnode) => {
-    return textnode.toLowerCase().indexOf(value.toLowerCase()) >= 0;
-  },
-  is: (value, textnode) => {
-
-    var date1 = getDateObjectFromFormat(value, DATE_FMT);
-    var date2 = getDateObjectFromFormat(textnode, DATE_FMT);
-
-    if (date1 == 0 || date2 == 0) {
-      return textnode.trim().toUpperCase() == value.toUpperCase();
-    } else {
-      return ((textnode.toUpperCase() == value.toUpperCase()) || (date1 == date2));
-    }
-  },
-  isNot: (value, textnode) => {
-
-    return textnode.trim().toUpperCase() != value.toUpperCase();
-  },
-  isBefore: (value, textnode) => {
-    var date1 = getDateObjectFromFormat(value, DATE_FMT);
-    var date2 = getDateObjectFromFormat(textnode, DATE_FMT);
-    return date1 >= date2;
-  },
-  isAfter: (value, textnode) => {
-
-    var date1 = getDateObjectFromFormat(value, DATE_FMT);
-    var date2 = getDateObjectFromFormat(textnode, DATE_FMT);
-
-    return date1 <= date2;
-  },
-  notContains: (value, textnode) => {
-    return !(textnode.match(value, "i"));
-  },
-  inherited: (value, textnode) => {
-    return value == 'true' ? filterHandlers['contains']('inherited', textnode) : filterHandlers['notContains']('inherited', textnode);
-  }
 }
 
 const mapDispatchToProps = (dispatch) => {

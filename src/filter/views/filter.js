@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {Button, Panel} from 'react-bootstrap';
 import {connect} from 'react-redux';
 
@@ -16,7 +16,7 @@ const preHandleFilters = (filters = [], activityTags = []) => {
         let val = filter.value;
         return (filter.field === 'activityTags' && val === '' && activityTags.length > 0) ? {
             ...filter,
-            value: activityTags[0]
+            value: activityTags.length > 0 && activityTags[0]
         } : {
             ...filter,
             value: val
@@ -25,7 +25,7 @@ const preHandleFilters = (filters = [], activityTags = []) => {
 };
 const Filter = ({
     open,
-    data,
+    filters,
     activityTags,
     toggleFilter,
     addFilter,
@@ -42,14 +42,14 @@ const Filter = ({
     return (
         <div>
             <Panel collapsible expanded={open} header={header}>
-                <FilterList filters={data} onFieldChange={onFieldChange} onFieldRemove={onFieldRemove} activityTags={activityTags}/>
+                <FilterList filters={filters} onFieldChange={onFieldChange} onFieldRemove={onFieldRemove} activityTags={activityTags}/>
                 <div style={{
                     'marginTop': '5px'
                 }}>
                     <Button
                         onClick={(ev) => {
                         ev.preventDefault();
-                        runFilter(preHandleFilters(data, activityTags));
+                        runFilter(preHandleFilters(filters, activityTags));
                     }}>
                         Run Filter
                     </Button>{' '}
@@ -65,7 +65,7 @@ const Filter = ({
         </div>
     );
 }
-const mapStateToProps = (state, ownProps) => ({open: state.filter.open, data: state.filter.data, activityTags: state.constant.activityTags});
+const mapStateToProps = (state, ownProps) => ({open: state.filter.open, filters: state.filter.data, activityTags: state.constant.activityTags});
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     toggleFilter: () => {

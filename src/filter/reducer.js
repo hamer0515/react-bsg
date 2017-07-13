@@ -1,27 +1,7 @@
 import {CHANGE_FILTER, TOGGLE_FILTER, Add_FILTER, REMOVE_FILTER} from './actionTypes.js';
-import {activityTags, users} from '../constants';
+import {getDefaultValueByField, getDefaultTypeByField} from '../constants';
 
-function getDefaultValueByField(field) {
-    if (field === 'effectiveDate' || field === 'dateAdded') {
-        return '';
-    } else if (field === 'author') {
-        return users[0];
-    } else if (field === 'titleAndDescription') {
-        return '';
-    } else if (field === 'activityTags') {
-        return '';
-    } else if (field === 'inherited') {
-        return 'fasle';
-    } else {
-        return 'MeetingBean';
-    }
-}
-
-function getDefaultTypeByField(field) {
-    return field === 'inherited' ? 'inherited' : 'contains';
-}
-
-export default(state = [], action) => {
+export default (state = {}, action) => {
     switch (action.type) {
         case CHANGE_FILTER:
             {

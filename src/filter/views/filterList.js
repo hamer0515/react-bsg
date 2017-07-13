@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 import FilterItem from './filterItem';
 
-const FilterList = ({filters, data, activityTags, onFieldChange, onFieldRemove}) => {
+const FilterList = ({filters, activityTags, onFieldChange, onFieldRemove}) => {
     return (
         <div>
             {filters.map((item) => (<FilterItem id={item.id} key={item.id} activityTags={activityTags} field={item.field} onFieldChange={onFieldChange} onFieldRemove={onFieldRemove}/>))}
@@ -12,8 +11,10 @@ const FilterList = ({filters, data, activityTags, onFieldChange, onFieldRemove})
 }
 
 FilterList.PropTypes = {
-    filters: PropTypes.object.isRequired,
-    allTags: PropTypes.object.isRequired
+    filters: PropTypes.array.isRequired,
+    activityTags: PropTypes.array.isRequired,
+    onFieldChange: PropTypes.func.isRequired,
+    onFieldRemove: PropTypes.func.isRequired
 };
 
 export default FilterList;

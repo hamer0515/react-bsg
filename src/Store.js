@@ -1,9 +1,9 @@
 import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import thunk from 'redux-thunk';
 
-import {reducer as filterReducer} from './filter/';
-import {reducer as dataReducer} from './datas/';
-import {reducer as constantReducer} from './constant/';
+import {reducer as filterReducer} from './filter';
+import {reducer as dataReducer} from './datas';
+import {reducer as constantReducer} from './constant';
 
 import Perf from 'react-addons-perf';
 
@@ -12,12 +12,12 @@ win.Perf = Perf
 
 const reducer = combineReducers({filter: filterReducer, data: dataReducer, constant: constantReducer});
 
-const middlewares = [thunkMiddleware];
-if (process.env.NODE_ENV !== 'production') {
-    middlewares.push(require('redux-immutable-state-invariant').default());
-}
+const middlewares = process.env.NODE_ENV !== 'production' ?
+  [require('redux-immutable-state-invariant').default(), thunk] :
+  [thunk];
 
-const storeEnhancers = compose(applyMiddleware(...middlewares), (win && win.devToolsExtension) ? win.devToolsExtension() : (f) => f,);
+
+const storeEnhancers = compose(applyMiddleware(...middlewares), (win && win.devToolsExtension) ? win.devToolsExtension() : (f) => f);
 
 export default createStore(reducer, {
     filter: {

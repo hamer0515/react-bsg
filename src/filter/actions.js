@@ -7,6 +7,6 @@ export const toggleFilter = () => ({type: TOGGLE_FILTER});
 
 export const addFilter = () => ({type: Add_FILTER});
 
-export const removeFilter = (id) => ({type: REMOVE_FILTER, id: id});
+export const removeFilter = id => ({type: REMOVE_FILTER, id: id});
 
-export const runFilter = (filter) => (dataActions.setFilter(filter));
+export const runFilter = filter => (dataActions.setFilter(filter));
