@@ -1,12 +1,13 @@
-import React, {Component} from 'react';
-import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
-import dateformat, {formatToDate} from 'dateformat-util';
+import React, { Component } from 'react';
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
+import dateformat from 'dateformat-util';
 import Loading from 'react-loading';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import * as Status from '../status.js';
 import PropTypes from 'prop-types';
 import {actions as draftActions} from '../';
 import {filterHandlers, fields} from '../../constants';
+
 
 class DraftTable extends Component {
 
@@ -25,23 +26,16 @@ class DraftTable extends Component {
     onDraftDelete: PropTypes.func.isRequired
   }
 
-  viewDraft(url) {
-    window.open(url, '_blank', 'height=760,width=700,toolbar=0,location=0,menubar=0');
+  popupWindow(url, width = 700, height = 700) {
+    window.open(url, '_blank', `height=${height},width=${width},toolbar=0,location=0,menubar=0`);
   }
 
-  deleteDraft(url, title, event) {
+  deleteDraft(url, title) {
     if (window.confirm('Delete the note ' + title)) {
       this.props.onDraftDelete(url);
     } else {
       return false;
     };
-  }
-
-  viewHistory(url) {
-    window.open(url, '_blank', 'height=700,width=700,toolbar=0,location=0,menubar=0');
-  }
-  editDraft(url, event) {
-    window.open(url, '_blank', 'height=1190,width=700,toolbar=0,location=0,menubar=0');
   }
 
   dateFormatter(cell, row, extraData = 'dd/MM/yyyy hh:mm:ss') {
@@ -70,7 +64,7 @@ class DraftTable extends Component {
   }
 
   attachToFormatter(cell, row) {
-    const {attachToLink} = row;
+    const { attachToLink } = row;
     return (
       <a href={attachToLink}>{cell}</a>
     );
@@ -95,13 +89,13 @@ class DraftTable extends Component {
     } = row;
     return (
       <div>
-        <a href="javascript:void(0);" onClick={this.viewDraft.bind(this, viewLink)}>View
+        <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, viewLink, 700, 700)}>View
         </a>
-        {haveModiifyPermission && <a href="javascript:void(0);" onClick={this.editDraft.bind(this, modifyLink)}>| Edit
+        {haveModiifyPermission && <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, modifyLink, 700, 1190)}>| Edit
         </a>}
         {(haveDeletePermisssion && haveFullPermission) && <a href="javascript:void(0);" onClick={this.deleteDraft.bind(this, deleteLink, title)}>| Delete
         </a>}
-        <a href="javascript:void(0);" onClick={this.viewHistory.bind(this, historyLink)}>| History</a>
+        <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, historyLink, 700, 1190)}>| History</a>
       </div>
     );
   }
@@ -109,54 +103,64 @@ class DraftTable extends Component {
   getColumns() {
     const columns = [];
     columns.push(
-      <TableHeaderColumn dataField="createdDate" isKey={true} dataSort width="150px">Date Added to Backstop</TableHeaderColumn>
+      <TableHeaderColumn key={0} dataField="createdDate" isKey={true} dataSort width="150px">Date Added to Backstop</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn dataField="modifiedDate" dataSort width="150px">Modify Date</TableHeaderColumn>
+      <TableHeaderColumn key={1} dataField="modifiedDate" dataSort width="150px">Modify Date</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn dataField="author" dataSort width="150px">Author</TableHeaderColumn>
+      <TableHeaderColumn key={2} dataField="author" dataSort width="150px">Author</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn export={false} dataFormat={this.typeFormatter} width="70px">Type</TableHeaderColumn>
+      <TableHeaderColumn key={3} export={false} dataFormat={this.typeFormatter} width="70px">Type</TableHeaderColumn>
     );
     columns.push(
       <TableHeaderColumn
+        key={4}
         dataField="inherited"
         hidden
         dataFormat={(cell, row) => {
-        return row.flowThrough ? 'inherited' : '';
-      }}>Inherited</TableHeaderColumn>
+          return row.flowThrough ? 'inherited' : '';
+        }}>Inherited</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn export={false} dataFormat={this.titleAndDescFormatter} width="150px">Title and Description</TableHeaderColumn>
+      <TableHeaderColumn key={5} export={false} dataFormat={this.titleAndDescFormatter} width="150px">Title and Description</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn dataField="attachTo" dataSort dataFormat={this.attachToFormatter} width="150px">Attached To</TableHeaderColumn>
+      <TableHeaderColumn key={6} dataField="attachTo" dataSort dataFormat={this.attachToFormatter} width="150px">Attached To</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn dataField="toReview" dataSort dataFormat={this.toReviewFormatter} width="300px">User Permitted to Review</TableHeaderColumn>
+      <TableHeaderColumn key={7} dataField="toReview" dataSort dataFormat={this.toReviewFormatter} width="300px">User Permitted to Review</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn dataFormat={this.actionsFormatter} width="200px">Actions</TableHeaderColumn>
+      <TableHeaderColumn key={8} dataFormat={this.actionsFormatter} width="200px">Actions</TableHeaderColumn>
     );
     return columns;
   }
 
-  setTableNoDataText(isDataFetched) {
-    if (!isDataFetched) {
-      return 'No activity found';
-    } else {
-      const style = {
-        position: 'relative',
-        left: '50%',
-        top: '50%'
-      };
-      return (
-        <div style={style}>
-          <Loading type="spinningBubbles" color="#444"/>
-        </div>
-      );
+  setTableNoDataText(status = Status.LOADING) {
+    switch (status) {
+      case Status.LOADING: {
+        const style = {
+          position: 'relative',
+          left: '50%',
+          top: '50%'
+        };
+        return (
+          <div style={style}>
+            <Loading type="spinningBubbles" color="#444" />
+          </div>)
+      }
+      case Status.SUCCESS:
+       return 'No activity found';
+      case Status.FAILURE:
+        {
+          return <div>Loading data failed!</div>;
+        }
+      default:
+        {
+          throw new Error('unexpected status ' + status);
+        }
     }
   }
 
@@ -165,7 +169,7 @@ class DraftTable extends Component {
   }
 
   filterData(filters = [], activitys = []) {
-    if (filters.length == 0 || activitys.length == 0) {
+    if (filters.length === 0 || activitys.length === 0) {
       return activitys;
     }
     return activitys.filter(activity => {
@@ -184,35 +188,21 @@ class DraftTable extends Component {
       status,
       pageLimit = 10,
       filters,
-      activitys
+      activitys=[]
     } = this.props;
     const options = {
-      noDataText: this.setTableNoDataText(status === Status.LOADING),
+      noDataText: this.setTableNoDataText(status),
       sizePerPage: pageLimit, // which size per page you want to locate as default
       sortIndicator: false
     };
 
     let filteredActivities = filters ? this.filterData(filters, activitys) : activitys;
 
-    switch (status) {
-      case Status.LOADING:
-      case Status.SUCCESS:
-        {
-          return (
-            <BootstrapTable options={options} data={filteredActivities} pagination>
-              {this.getColumns()}
-            </BootstrapTable>
-          );
-        }
-      case Status.FAILURE:
-        {
-          return <div>Loading data failed!</div>;
-        }
-      default:
-        {
-          throw new Error('unexpected status ' + status);
-        }
-    }
+    return (
+      <BootstrapTable options={options} data={filteredActivities} pagination>
+        {this.getColumns()}
+      </BootstrapTable>
+    );
   }
 }
 

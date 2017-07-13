@@ -12,10 +12,7 @@ win.Perf = Perf
 
 const reducer = combineReducers({filter: filterReducer, data: dataReducer, constant: constantReducer});
 
-const middlewares = process.env.NODE_ENV !== 'production' ?
-  [require('redux-immutable-state-invariant').default(), thunk] :
-  [thunk];
-
+const middlewares = [thunk];
 
 const storeEnhancers = compose(applyMiddleware(...middlewares), (win && win.devToolsExtension) ? win.devToolsExtension() : (f) => f);
 

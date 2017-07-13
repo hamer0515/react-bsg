@@ -12,3 +12,9 @@ td div{
 white-space: normal; 
 word-break:break-all;
 }
+
+.loading-div{
+  position: 'relative';
+  left: '50%';
+  top: '50%';
+}
