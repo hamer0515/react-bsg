@@ -1,0 +1,14 @@
+#root {
+  margin: 20px;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.hide{
+  visibility: hidden;
+}
+
+td div{ 
+white-space: normal; 
+word-break:break-all;
+}

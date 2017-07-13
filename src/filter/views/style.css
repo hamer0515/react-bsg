@@ -1,0 +1,11 @@
+.panel-heading{
+    text-align: right;
+}
+
+.form-inline{
+    margin-top: 5px;
+}
+
+.form-inline>.form-group{
+    margin-left: 5px;
+}

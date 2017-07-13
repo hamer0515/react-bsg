@@ -1,0 +1,1 @@
+export const CONSTANT_SET_TAGS = 'CONSTANT/SET_TAGS';
