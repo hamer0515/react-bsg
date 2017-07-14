@@ -82,7 +82,7 @@ class FilterItem extends Component {
         const fieldItems = getFieldControl();
         const typeItems = getTypeControl(field);
         const valueControl = getValueControl(id, field, activityTags, onFieldChange);
-        const onChangeHandler = ev => onFieldChange(id, 'field', ev.target.value, activityTags[0]);
+        const onChangeHandler = ev => onFieldChange(id, 'field', ev.target.value, activityTags && activityTags.length > 0 ? activityTags[0] : '');
         return (
             <Form inline id={id} key={id}>
                 <Button bsStyle="link" onClick={ev => onFieldRemove(id)}><Glyphicon glyph="remove"/></Button>
