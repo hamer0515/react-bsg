@@ -7,6 +7,7 @@ import * as Status from '../status.js';
 import PropTypes from 'prop-types';
 import { actions as draftActions } from '../';
 import { filterHandlers, fields } from '../../constants';
+import { Button } from 'react-bootstrap';
 
 
 class DraftTable extends Component {
@@ -14,6 +15,7 @@ class DraftTable extends Component {
   constructor(props) {
     super(props);
     this.actionsFormatter = this.actionsFormatter.bind(this);
+    this.titleAndDescFormatter = this.titleAndDescFormatter.bind(this);
   }
 
   static propTypes = {
@@ -23,7 +25,8 @@ class DraftTable extends Component {
     status: PropTypes.string.isRequired,
     onPageInit: PropTypes.func.isRequired,
     pageLimit: PropTypes.number,
-    onDraftDelete: PropTypes.func.isRequired
+    onDraftDelete: PropTypes.func.isRequired,
+    error: PropTypes.string
   }
 
   popupWindow(url, width = 700, height = 700) {
@@ -56,17 +59,28 @@ class DraftTable extends Component {
       isImportant,
       linkUrl
     } = row;
-    const draftTag = draft ? '<B>(Draft)</B>' : '';
-    const importantTag = isImportant ? '<span class="glyphicon glyphicon-exclamation-sign" title="Important (Top of List)"></span>' : '';
-    const descTag = description.length > 500 ? description.substring(0, 500) + `...<a href="javascript:window.open('${linkUrl}','_blank', 'height=795,width=700,toolbar=0,location=0,menubar=0');">More</a>` : `<div>${description}</div>`;
-    return `${draftTag} ${importantTag} <a href="javascript:window.open('${linkUrl}','_blank', 'height=795,width=700,toolbar=0,location=0,menubar=0');">${title}</a>
-            <br/>${descTag}`;
+    return (
+      <div>
+        {draft && <b>(Draft)</b>}
+        {isImportant && <span className="glyphicon glyphicon-exclamation-sign" title="Important (Top of List)"></span>}
+        <Button bsStyle="link" onClick={this.popupWindow.bind(this, linkUrl, 700, 795)}>{title}</Button>
+        <br />
+        {description.length > 500 ? (
+          <div>
+            <span>{description.substring(0, 500)}...</span>
+            <Button bsStyle="link" onClick={this.popupWindow.bind(this, linkUrl, 700, 795)}>More</Button>
+          </div>
+        ) :
+          <span>{description}</span>
+        }
+      </div>
+    );
   }
 
   attachToFormatter(cell, row) {
     const { attachToLink } = row;
     return (
-      <a href={attachToLink}>{cell}</a>
+      <Button bsStyle="link" href={attachToLink}>{cell}</Button>
     );
   }
 
@@ -89,13 +103,10 @@ class DraftTable extends Component {
     } = row;
     return (
       <div>
-        <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, viewLink, 700, 700)}>View
-        </a>
-        {haveModiifyPermission && <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, modifyLink, 700, 1190)}>| Edit
-        </a>}
-        {(haveDeletePermisssion && haveFullPermission) && <a href="javascript:void(0);" onClick={this.deleteDraft.bind(this, noteId, title)}>| Delete
-        </a>}
-        <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, historyLink, 700, 1190)}>| History</a>
+        <Button bsStyle="link" onClick={this.popupWindow.bind(this, viewLink, 700, 700)}>View</Button>
+        {haveModiifyPermission && <Button bsStyle="link" onClick={this.popupWindow.bind(this, modifyLink, 700, 1190)}>Edit</Button>}
+        {(haveDeletePermisssion && haveFullPermission) && <Button bsStyle="link" onClick={this.deleteDraft.bind(this, noteId, title)}>Delete</Button>}
+        <Button bsStyle="link" onClick={this.popupWindow.bind(this, historyLink, 700, 1190)}>History</Button>
       </div>
     );
   }
@@ -103,16 +114,16 @@ class DraftTable extends Component {
   getColumns() {
     const columns = [];
     columns.push(
-      <TableHeaderColumn key={0} dataField="createdDate" isKey={true} dataSort width="150px">Date Added to Backstop</TableHeaderColumn>
+      <TableHeaderColumn key={0} dataField="createdDate" isKey={true} dataSort width="10%">Date Added to Backstop</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={1} dataField="modifiedDate" dataSort width="150px">Modify Date</TableHeaderColumn>
+      <TableHeaderColumn key={1} dataField="modifiedDate" dataSort width="10%">Modify Date</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={2} dataField="author" dataSort width="150px">Author</TableHeaderColumn>
+      <TableHeaderColumn key={2} dataField="author" dataSort width="10%">Author</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={3} export={false} dataFormat={this.typeFormatter} width="70px">Type</TableHeaderColumn>
+      <TableHeaderColumn key={3} export={false} dataFormat={this.typeFormatter} width="10%">Type</TableHeaderColumn>
     );
     columns.push(
       <TableHeaderColumn
@@ -124,21 +135,21 @@ class DraftTable extends Component {
         }}>Inherited</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={5} export={false} dataFormat={this.titleAndDescFormatter} width="150px">Title and Description</TableHeaderColumn>
+      <TableHeaderColumn key={5} export={false} dataFormat={this.titleAndDescFormatter}>Title and Description</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={6} dataField="attachTo" dataSort dataFormat={this.attachToFormatter} width="150px">Attached To</TableHeaderColumn>
+      <TableHeaderColumn key={6} dataField="attachTo" dataSort dataFormat={this.attachToFormatter}>Attached To</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={7} dataField="toReview" dataSort dataFormat={this.toReviewFormatter} width="300px">User Permitted to Review</TableHeaderColumn>
+      <TableHeaderColumn key={7} dataField="toReview" dataSort dataFormat={this.toReviewFormatter}>User Permitted to Review</TableHeaderColumn>
     );
     columns.push(
-      <TableHeaderColumn key={8} dataFormat={this.actionsFormatter} width="200px">Actions</TableHeaderColumn>
+      <TableHeaderColumn key={8} dataFormat={this.actionsFormatter}>Actions</TableHeaderColumn>
     );
     return columns;
   }
 
-  setTableNoDataText(status = Status.LOADING) {
+  setTableNoDataText(status = Status.LOADING, error='Loading data failed!') {
     switch (status) {
       case Status.LOADING: {
         const style = {
@@ -155,7 +166,7 @@ class DraftTable extends Component {
         return 'No activity found';
       case Status.FAILURE:
         {
-          return <div>Loading data failed!</div>;
+          return <div>{error}</div>;
         }
       default:
         {
@@ -188,10 +199,11 @@ class DraftTable extends Component {
       status,
       pageLimit = 10,
       filters,
-      activitys = []
+      activitys = [],
+      error
     } = this.props;
     const options = {
-      noDataText: this.setTableNoDataText(status),
+      noDataText: this.setTableNoDataText(status,error),
       sizePerPage: pageLimit, // which size per page you want to locate as default
       sortIndicator: false
     };
@@ -247,7 +259,8 @@ const mapStateTopProps = (state) => {
     dtDateFormat: draftTable.dtDateFormat,
     dateFormat: draftTable.dateFormat,
     pageLimit: draftTable.pageLimit,
-    filters: draftTable.filter
+    filters: draftTable.filter,
+    error: draftTable.error
   };
 };
 

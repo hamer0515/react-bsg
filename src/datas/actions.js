@@ -1,78 +1,53 @@
-import { FETCH_STARTED, FETCH_SUCCESS, FETCH_FAILURE, SET_FILTER } from './actionTypes.js';
+import { FETCH_STARTED, FETCH_SUCCESS, FETCH_FAILURE, SET_FILTER, DELETE_STARTED, DELETE_SUCCESS, DELETE_FAILURE } from './actionTypes';
 import { apiUrl } from '../constants';
-import { actions as constantActions } from '../constant/';
-
-
-
-let nextSeqId = 0;
-
-export const fetchDataStarted = () => ({ type: FETCH_STARTED });
-
-export const fetchDataSuccess = (result) => ({ type: FETCH_SUCCESS, result });
-
-export const fetchDataFailure = (error) => ({ type: FETCH_FAILURE, error });
+import { CALL_API } from 'redux-api-middleware';
 
 export const fetchData = () => {
-    return (dispatch) => {
-        const seqId = ++nextSeqId;
-        const dispatchIfValid = (action) => {
-            if (seqId === nextSeqId) {
-                return dispatch(action);
-            }
-        };
+    return {
+        [CALL_API]: {
+            endpoint: apiUrl.products,
+            method: 'GET',
+            types: [
+                FETCH_STARTED,
+                {
+                    type: FETCH_SUCCESS,
+                    payload: (action, state, res) => {
+                        let tags = [];
+                        return res.json().then((json) => {
+                            json.data.activitys.forEach(item => {
+                                tags.push(...item.allTags);
+                            });
+                            tags = new Set(tags);
+                            json.data.activityTags = [...tags];
+                            return { result: json.data };
+                        });
+                    }
+                },
+                FETCH_FAILURE
+            ]
 
-        dispatchIfValid(fetchDataStarted());
-
-        fetch(apiUrl.products).then((response) => {
-            if (response.status !== 200) {
-                throw new Error('Fail to get response with status ' + response.status);
-            }
-
-            response.json().then((responseJson) => {
-                dispatchIfValid(fetchDataSuccess(responseJson.data));
-                let tags = [];
-                responseJson.data.activitys.forEach(item => {
-                    tags.push(...item.allTags);
-                });
-                tags = new Set(tags);
-                dispatch(constantActions.setActivityTags([...tags]));
-            }).catch((error) => {
-                console.log(error);
-                dispatchIfValid(fetchDataFailure(error));
-            });
-        }).catch((error) => {
-            dispatchIfValid(fetchDataFailure(error));
-        });
-    };
+        }
+    }
 };
 
 export const deleteData = (noteId) => {
-    return (dispatch) => {
-        const deleteUrl = apiUrl.delete + `/${noteId}`;
-        const seqId = ++nextSeqId;
-        const dispatchIfValid = (action) => {
-            if (seqId === nextSeqId) {
-                return dispatch(action);
-            }
-        };
-
-        dispatchIfValid(fetchDataStarted());
-
-        fetch(deleteUrl).then((response) => {
-            if (response.status !== 200) {
-                throw new Error('Fail to get response with status ' + response.status);
-            }
-
-            response.json().then((responseJson) => {
-                dispatchIfValid(fetchDataSuccess(responseJson.data));
-            }).catch((error) => {
-                console.log(error);
-                dispatchIfValid(fetchDataFailure(error));
-            });
-        }).catch((error) => {
-            dispatchIfValid(fetchDataFailure(error));
-        });
-    };
+    const deleteUrl = apiUrl.delete + `/${noteId}`;
+    return {
+            [CALL_API]: {
+            endpoint: deleteUrl,
+            method: 'GET',
+            types: [
+                DELETE_STARTED,
+                {
+                    type: DELETE_SUCCESS,
+                    payload: (action, state, res) => {
+                        return res.json().then((json) => ({results:json.data}));
+                    }
+                },
+                DELETE_FAILURE
+            ]
+        }
+    }
 };
 
 export const setFilter = (filter) => ({ type: SET_FILTER, filter });

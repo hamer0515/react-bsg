@@ -65,7 +65,7 @@ const Filter = ({
         </div>
     );
 }
-const mapStateToProps = (state, ownProps) => ({open: state.filter.open, filters: state.filter.data, activityTags: state.constant.activityTags});
+const mapStateToProps = (state, ownProps) => ({open: state.filter.open, filters: state.filter.data, activityTags: state.data.activityTags});
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     toggleFilter: () => {
