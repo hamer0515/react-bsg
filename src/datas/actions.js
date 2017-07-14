@@ -1,17 +1,19 @@
-import {FETCH_STARTED, FETCH_SUCCESS, FETCH_FAILURE, SET_FILTER} from './actionTypes.js';
-import {actions as constantActions} from '../constant/';
+import { FETCH_STARTED, FETCH_SUCCESS, FETCH_FAILURE, SET_FILTER } from './actionTypes.js';
+import { apiUrl } from '../constants';
+import { actions as constantActions } from '../constant/';
+
+
 
 let nextSeqId = 0;
 
-export const fetchDataStarted = () => ({type: FETCH_STARTED});
+export const fetchDataStarted = () => ({ type: FETCH_STARTED });
 
-export const fetchDataSuccess = (result) => ({type: FETCH_SUCCESS, result});
+export const fetchDataSuccess = (result) => ({ type: FETCH_SUCCESS, result });
 
-export const fetchDataFailure = (error) => ({type: FETCH_FAILURE, error});
+export const fetchDataFailure = (error) => ({ type: FETCH_FAILURE, error });
 
 export const fetchData = () => {
     return (dispatch) => {
-        const apiUrl = 'http://localhost:3000/products';
         const seqId = ++nextSeqId;
         const dispatchIfValid = (action) => {
             if (seqId === nextSeqId) {
@@ -21,7 +23,7 @@ export const fetchData = () => {
 
         dispatchIfValid(fetchDataStarted());
 
-        fetch(apiUrl).then((response) => {
+        fetch(apiUrl.products).then((response) => {
             if (response.status !== 200) {
                 throw new Error('Fail to get response with status ' + response.status);
             }
@@ -44,9 +46,9 @@ export const fetchData = () => {
     };
 };
 
-export const deleteData = (url) => {
+export const deleteData = (noteId) => {
     return (dispatch) => {
-        const apiUrl = 'http://localhost:3000/delete';
+        const deleteUrl = apiUrl.delete + `/${noteId}`;
         const seqId = ++nextSeqId;
         const dispatchIfValid = (action) => {
             if (seqId === nextSeqId) {
@@ -56,7 +58,7 @@ export const deleteData = (url) => {
 
         dispatchIfValid(fetchDataStarted());
 
-        fetch(apiUrl).then((response) => {
+        fetch(deleteUrl).then((response) => {
             if (response.status !== 200) {
                 throw new Error('Fail to get response with status ' + response.status);
             }
@@ -73,4 +75,4 @@ export const deleteData = (url) => {
     };
 };
 
-export const setFilter = (filter) => ({type: SET_FILTER, filter});
+export const setFilter = (filter) => ({ type: SET_FILTER, filter });

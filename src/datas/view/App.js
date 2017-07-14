@@ -5,8 +5,8 @@ import Loading from 'react-loading';
 import { connect } from 'react-redux';
 import * as Status from '../status.js';
 import PropTypes from 'prop-types';
-import {actions as draftActions} from '../';
-import {filterHandlers, fields} from '../../constants';
+import { actions as draftActions } from '../';
+import { filterHandlers, fields } from '../../constants';
 
 
 class DraftTable extends Component {
@@ -30,9 +30,9 @@ class DraftTable extends Component {
     window.open(url, '_blank', `height=${height},width=${width},toolbar=0,location=0,menubar=0`);
   }
 
-  deleteDraft(url, title) {
+  deleteDraft(noteId, title) {
     if (window.confirm('Delete the note ' + title)) {
-      this.props.onDraftDelete(url);
+      this.props.onDraftDelete(noteId);
     } else {
       return false;
     };
@@ -70,7 +70,7 @@ class DraftTable extends Component {
     );
   }
 
-  toReviewFormatter(cell, row) {
+  toReviewFormatter(cell) {
     return (
       <div>{cell}</div>
     );
@@ -83,9 +83,9 @@ class DraftTable extends Component {
       modifyLink,
       haveDeletePermisssion,
       haveFullPermission,
-      deleteLink,
       title,
-      historyLink
+      historyLink,
+      noteId
     } = row;
     return (
       <div>
@@ -93,7 +93,7 @@ class DraftTable extends Component {
         </a>
         {haveModiifyPermission && <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, modifyLink, 700, 1190)}>| Edit
         </a>}
-        {(haveDeletePermisssion && haveFullPermission) && <a href="javascript:void(0);" onClick={this.deleteDraft.bind(this, deleteLink, title)}>| Delete
+        {(haveDeletePermisssion && haveFullPermission) && <a href="javascript:void(0);" onClick={this.deleteDraft.bind(this, noteId, title)}>| Delete
         </a>}
         <a href="javascript:void(0);" onClick={this.popupWindow.bind(this, historyLink, 700, 1190)}>| History</a>
       </div>
@@ -152,7 +152,7 @@ class DraftTable extends Component {
           </div>)
       }
       case Status.SUCCESS:
-       return 'No activity found';
+        return 'No activity found';
       case Status.FAILURE:
         {
           return <div>Loading data failed!</div>;
@@ -188,7 +188,7 @@ class DraftTable extends Component {
       status,
       pageLimit = 10,
       filters,
-      activitys=[]
+      activitys = []
     } = this.props;
     const options = {
       noDataText: this.setTableNoDataText(status),
@@ -233,8 +233,8 @@ const mapDispatchToProps = (dispatch) => {
     onPageInit: () => {
       dispatch(draftActions.fetchData());
     },
-    onDraftDelete: (url) => {
-      dispatch(draftActions.deleteData(url));
+    onDraftDelete: (noteId) => {
+      dispatch(draftActions.deleteData(noteId));
     }
   };
 };

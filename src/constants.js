@@ -1,4 +1,4 @@
-import {getDateObjectFromFormat} from './utils/DateUtil';
+import { getDateObjectFromFormat } from './utils/DateUtil';
 
 export const users = ['Erin Hannon', 'Family Office'];
 
@@ -107,4 +107,9 @@ export const filterHandlers = {
     inherited: (value, textnode) => {
         return filterHandlers[value === 'true' ? 'contains' : 'notContains']('true', textnode);
     }
+}
+
+export const apiUrl = {
+    products: 'http://localhost:3000/products',
+    delete: 'http://localhost:3000/delete'
 }
