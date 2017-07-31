@@ -1,4 +1,4 @@
-import view from './views/filter';
+import view from './views/myDraft';
 import reducer from './reducer';
 
 export {view, reducer};
