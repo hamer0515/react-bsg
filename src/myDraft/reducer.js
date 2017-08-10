@@ -12,7 +12,7 @@ export default(state = {}, action) => {
                 return {
                     ...state,
                     status: SUCCESS,
-                    ...action.payload.data
+                    data: action.payload.data
                 };
             }
         case FETCH_FAILURE:

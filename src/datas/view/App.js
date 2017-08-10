@@ -5,7 +5,7 @@ import Loading from 'react-loading';
 import { connect } from 'react-redux';
 import * as Status from '../status.js';
 import PropTypes from 'prop-types';
-import { actions as draftActions } from '../';
+import { actions as draftActions } from '../actions';
 import { filterHandlers, fields } from '../../constants';
 import { Button } from 'react-bootstrap';
 

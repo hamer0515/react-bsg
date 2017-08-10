@@ -9,6 +9,7 @@ export const fetchData = (value) => ({
     [CALL_API]: {
         endpoint: GetDataUrl,
         method: 'GET',
+        credentials:'include',
         types: [
             FETCH_STARTED, {
                 type: FETCH_SUCCESS,
